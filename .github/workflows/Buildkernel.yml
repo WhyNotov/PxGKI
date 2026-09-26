@@ -94,7 +94,7 @@ jobs:
          set -euo pipefail
          cd Buildkernel
          # SukiSU 6c13a06 (builtin branch, v2.1.0 era) matches susfs 4a1e831 on gki-android14-6.1
-         SUKISU_SRC="builtin"
+         SUKISU_SRC="6c13a06"
          SUKISU_VER="v4.1.3"
          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s "$SUKISU_SRC"
          git -C KernelSU fetch -q --tags origin 2>/dev/null || true
