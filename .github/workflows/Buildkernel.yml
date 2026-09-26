@@ -189,6 +189,12 @@ jobs:
          sed -i -e "s|\$(preempt-flag-y) \"\$(build-timestamp)\"|\$(preempt-flag-y) \"${{ github.event.inputs.Kernel_Time }}\"|" ./common/init/Makefile
          echo -e "\e[33m[Done]\e[0m" Set up kernel build timestamp
 
+      - name: Force SUBLEVEL to match stock (vermagic for stock vendor modules)
+        run: |
+         cd Buildkernel
+         sed -i 's/^SUBLEVEL = .*/SUBLEVEL = 162/' ./common/Makefile
+         echo "SUBLEVEL forced:"; grep -E '^(VERSION|PATCHLEVEL|SUBLEVEL) =' ./common/Makefile
+
       - name: Build kernel
         run: |
          cd Buildkernel
