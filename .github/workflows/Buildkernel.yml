@@ -115,6 +115,9 @@ jobs:
          cp susfs4ksu/kernel_patches/fs/* ./common/fs/
          cp susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
          cd common
+         # Fix: move ACK-added include out of susfs patch context window (namespace.c hunk#1)
+         sed -i '/^#include <trace\/hooks\/blk.h>$/d' fs/namespace.c
+         sed -i '/^#include <uapi\/linux\/mount.h>$/a #include <trace/hooks/blk.h>' fs/namespace.c
          patch -p1 -F 3 < 50_add_susfs_in_gki-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }}.patch
            
       - name: Add configuration to kernel
