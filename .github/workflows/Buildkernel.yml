@@ -110,7 +110,7 @@ jobs:
          cd Buildkernel
          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }}
          # Pin to susfs v2.1.0 (matches SukiSU 6c13a06)
-         echo "Using susfs gki-android14-6.1 branch tip (unpinned)"
+         git -C susfs4ksu checkout -q --detach 4a1e831 || echo "pin not found, using tip"
          cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }}.patch ./common/
          cp susfs4ksu/kernel_patches/fs/* ./common/fs/
          cp susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
