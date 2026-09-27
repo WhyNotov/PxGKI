@@ -30,6 +30,10 @@ on:
         description: "(Recommend same as stock kernel)  ㅤㅤㅤKernel Build Timestamp"
         required: true
         default: 'Fri Jan  9 16:33:46 UTC 2026'
+      Common_Commit:
+        description: "Pin kernel/common to exact commit (full SHA from stock uname -gXXXX), empty = branch tip"
+        required: false
+        default: ''
       Enable_KPM_Feature:
         description: "Enable KPM Feature"
         required: false
@@ -65,6 +69,15 @@ jobs:
          git config --global user.name "build-user"
          repo init -u https://android.googlesource.com/kernel/manifest -b common-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }}-${{ github.event.inputs.Security_Patch }} --depth=1
          repo sync
+
+      - name: Pin common to stock kernel commit
+        if: ${{ github.event.inputs.Common_Commit != '' }}
+        run: |
+         cd Buildkernel/common
+         REMOTE=$(git remote | head -1)
+         git fetch -q --depth=1 "$REMOTE" ${{ github.event.inputs.Common_Commit }}
+         git checkout -q FETCH_HEAD
+         echo "common pinned to $(git rev-parse HEAD)"; grep -E '^(VERSION|PATCHLEVEL|SUBLEVEL) =' Makefile
 
       - name: Fix 6.6 Build
         if: ${{ github.event.inputs.Kernel_Version == '6.6' }}
@@ -116,8 +129,10 @@ jobs:
          cp susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
          cd common
          # Fix: move ACK-added include out of susfs patch context window (namespace.c hunk#1)
-         sed -i '/^#include <trace\/hooks\/blk.h>$/d' fs/namespace.c
-         sed -i '/^#include <uapi\/linux\/mount.h>$/a #include <trace/hooks/blk.h>' fs/namespace.c
+         if grep -q '^#include <trace/hooks/blk.h>$' fs/namespace.c; then
+           sed -i '/^#include <trace\/hooks\/blk.h>$/d' fs/namespace.c
+           sed -i '/^#include <uapi\/linux\/mount.h>$/a #include <trace/hooks/blk.h>' fs/namespace.c
+         fi
          patch -p1 -F 3 < 50_add_susfs_in_gki-android${{ github.event.inputs.Android_Release }}-${{ github.event.inputs.Kernel_Version }}.patch
            
       - name: Add configuration to kernel
